@@ -1,0 +1,680 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>takuzu.html</title>
+</head>
+<body>
+<div class="why3doc">
+<h1>Solving Takuzu Puzzles</h1>
+
+<p>MPRI course 2-36-1 Proof of Programs - Project 2020-2021</p>
+<h2>Appetizers</h2>
+
+<p>Some simple functions on arrays of integers</p>
+<pre><span class="keyword1">module</span> <a name="Appetizers_">Appetizers</a>
+
+<span class="keyword1">predicate</span> <a name="__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a>
+<span class="keyword1">constant</span> <a name="__TERM_TO_BE_COMPLETED___17">__TERM_TO_BE_COMPLETED__</a> : 'a
+<span class="keyword1">constant</span> <a name="__VARIANT_TO_BE_COMPLETED___18">__VARIANT_TO_BE_COMPLETED__</a> : int
+<span class="keyword1">let</span> <span class="keyword1">constant</span> <a name="__EXPRESSION_TO_BE_COMPLETED___19">__EXPRESSION_TO_BE_COMPLETED__</a> : int = 0
+<span class="keyword1">let</span> <span class="keyword1">constant</span> <a name="__CODE_TO_BE_COMPLETED___20">__CODE_TO_BE_COMPLETED__</a> : unit = ()
+
+<span class="keyword1">use</span> int.<a href="int.html#Int_">Int</a>
+<span class="keyword1">use</span> array.<a href="array.html#Array_">Array</a>
+
+</pre>
+
+<h3>Checking if in an array there is never 3 consecutive zeros</h3>
+
+
+<h4>QUESTION 1</h4>
+
+<p>Specification of the first check</p>
+<pre><span class="keyword1">predicate</span> <a name="no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> (a:<a href="array.html#array_15">array</a> int) (l:int) =
+  <span class="keyword1">forall</span> i. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> i <a href="int.html#infix%20%3C_21">&lt;</a> l<a href="int.html#infix%20-_23">-</a>2 -&gt; <span class="keyword1">not</span> (a[i] = a[i<a href="int.html#infix%20+_19">+</a>1] = a[i<a href="int.html#infix%20+_19">+</a>2] = 0)
+</pre>
+<div class="info"><p>[no_3_consecutive_zeros_sub a l] is true whenever in the sub-array
+    [a[0..l-1]], there are no 3 consecutives occurrences of [0]
+</p>
+</div><pre><span class="keyword1">predicate</span> <a name="no_3_consecutive_zeros_48">no_3_consecutive_zeros</a> (a:<a href="array.html#array_15">array</a> int) =
+  <a href="#no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> a (Array.<a href="array.html#length_17">length</a> a)
+
+</pre>
+
+<h4>QUESTION 2</h4>
+
+<p>implementation 1</p>
+<pre><span class="keyword1">exception</span> <a name="TripleFound_59">TripleFound</a>
+
+<span class="keyword1">let</span> <a name="no_3_consecutive_zeros_version_1_61">no_3_consecutive_zeros_version_1</a> (a : <a href="array.html#array_15">array</a> int) : bool
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#no_3_consecutive_zeros_48">no_3_consecutive_zeros</a> a }
+  =
+  <span class="keyword1">try</span>
+    <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> Array.<a href="array.html#length_17">length</a> a <a href="int.html#infix%20-_23">-</a> 3 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> { <a href="#no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> a (i<a href="int.html#infix%20+_19">+</a>2) }
+      <span class="keyword1">if</span> a[i] <a href="int.html#infix%20=_16">=</a> 0 &amp;&amp; a[i<a href="int.html#infix%20+_19">+</a>1] <a href="int.html#infix%20=_16">=</a> 0 &amp;&amp; a[i<a href="int.html#infix%20+_19">+</a>2] <a href="int.html#infix%20=_16">=</a> 0 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#TripleFound_59">TripleFound</a>;
+    <span class="keyword1">done</span>;
+    True
+  <span class="keyword1">with</span> <a href="#TripleFound_59">TripleFound</a> -&gt; False
+  <span class="keyword1">end</span>
+
+</pre>
+
+<h4>QUESTION 3</h4>
+
+<p>implementation 2</p>
+<pre><span class="keyword1">let</span> <a name="no_3_consecutive_zeros_version_2_81">no_3_consecutive_zeros_version_2</a> (a : <a href="array.html#array_15">array</a> int) : bool
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#no_3_consecutive_zeros_48">no_3_consecutive_zeros</a> a }
+  =
+  <span class="keyword1">if</span> a.<a href="array.html#length_17">length</a> <a href="int.html#infix%20%3C_21">&lt;</a> 3 <span class="keyword1">then</span> True <span class="keyword1">else</span>
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> last2 = a[0] <span class="keyword1">in</span>
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> last1 = a[1] <span class="keyword1">in</span>
+  <span class="keyword1">try</span>
+    <span class="keyword1">for</span> i=2 <span class="keyword1">to</span> Array.<a href="array.html#length_17">length</a> a <a href="int.html#infix%20-_23">-</a> 1 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> {
+        last1=a[i<a href="int.html#infix%20-_23">-</a>1] /\
+        last2=a[i<a href="int.html#infix%20-_23">-</a>2] /\
+        <a href="#no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> a i
+      }
+      <span class="keyword1">let</span> v = a[i] <span class="keyword1">in</span>
+      <span class="keyword1">if</span> v <a href="int.html#infix%20=_16">=</a> 0 &amp;&amp; last1 <a href="int.html#infix%20=_16">=</a> 0 &amp;&amp; last2 <a href="int.html#infix%20=_16">=</a> 0 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#TripleFound_59">TripleFound</a>;
+      last2 &lt;- last1;
+      last1 &lt;- v;
+    <span class="keyword1">done</span>;
+    True
+  <span class="keyword1">with</span> <a href="#TripleFound_59">TripleFound</a> -&gt; False
+  <span class="keyword1">end</span>
+
+</pre>
+
+<h4>QUESTION 4</h4>
+
+<p>implementation 3</p>
+<pre><span class="keyword1">let</span> <a name="no_3_consecutive_zeros_version_3_114">no_3_consecutive_zeros_version_3</a> (a : <a href="array.html#array_15">array</a> int) : bool
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#no_3_consecutive_zeros_48">no_3_consecutive_zeros</a> a }
+  =
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> count_zeros = 0 <span class="keyword1">in</span>
+  <span class="keyword1">try</span>
+    <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> Array.<a href="array.html#length_17">length</a> a <a href="int.html#infix%20-_23">-</a> 1 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> {
+        0 <a href="int.html#infix%20%3C=_25">&lt;=</a> count_zeros <a href="int.html#infix%20%3C=_25">&lt;=</a> 2 /\
+        count_zeros <a href="int.html#infix%20%3C=_25">&lt;=</a> i /\
+        (count_zeros = 1 -&gt; a[i<a href="int.html#infix%20-_23">-</a>1] = 0) /\
+        (i <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; (a[i<a href="int.html#infix%20-_23">-</a>1] = 0 -&gt; count_zeros <a href="int.html#infix%20%3E=_26">&gt;=</a> 1)) /\
+        (i <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; (a[i<a href="int.html#infix%20-_23">-</a>1] = 0 = a[i<a href="int.html#infix%20-_23">-</a>2] &lt;-&gt; count_zeros = 2)) /\
+        (a[i] = 0 /\ count_zeros = 2 -&gt; <span class="keyword1">not</span> <a href="#no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> a (i<a href="int.html#infix%20+_19">+</a>1)) /\
+        <a href="#no_3_consecutive_zeros_sub_45">no_3_consecutive_zeros_sub</a> a i
+        }
+      <span class="keyword1">if</span> a[i] <a href="int.html#infix%20=_16">=</a> 0 <span class="keyword1">then</span>
+        <span class="keyword1">if</span> count_zeros <a href="int.html#infix%20=_16">=</a> 2 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#TripleFound_59">TripleFound</a>
+        <span class="keyword1">else</span> count_zeros &lt;- count_zeros <a href="int.html#infix%20+_19">+</a> 1
+      <span class="keyword1">else</span> count_zeros &lt;- 0
+    <span class="keyword1">done</span>;
+    True
+  <span class="keyword1">with</span> <a href="#TripleFound_59">TripleFound</a> -&gt; False
+  <span class="keyword1">end</span>
+
+</pre>
+
+<h3>Checking if an array contains as many zeros and ones</h3>
+
+
+
+<h4>QUESTION 5</h4>
+
+<pre><span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">ghost</span> <span class="keyword1">function</span> <a name="num_occ_154">num_occ</a> (e:int) (f:int -&gt; int) (i j :int) : int
+</pre>
+<div class="info"><p>number of <code>l</code>, <code>i &lt;= l &lt; j</code>, such that <code>f l</code> is equal to <code>e</code></p>
+</div><pre>  <span class="keyword2">variant</span> { <a href="#__VARIANT_TO_BE_COMPLETED___18">__VARIANT_TO_BE_COMPLETED__</a> }
+  = <span class="keyword1">if</span> <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> <span class="keyword1">then</span> 0 <span class="keyword1">else</span>
+    <span class="keyword1">if</span> <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> <span class="keyword1">then</span> 1 <a href="int.html#infix%20+_19">+</a> num_occ e f i (j<a href="int.html#infix%20-_23">-</a>1) <span class="keyword1">else</span> num_occ e f i (j<a href="int.html#infix%20-_23">-</a>1)
+
+</pre>
+
+<h4>QUESTIONS 6 and 7</h4>
+
+<pre><span class="keyword1">let</span> <a name="count_number_of_166">count_number_of</a> (e:int) (a:<a href="array.html#array_15">array</a> int) : int
+  <span class="keyword2">ensures</span> { <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> }
+  =
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> n = 0 <span class="keyword1">in</span>
+  <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> a.<a href="array.html#length_17">length</a> <a href="int.html#infix%20-_23">-</a> 1 <span class="keyword1">do</span>
+    <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> }
+    <a href="#__CODE_TO_BE_COMPLETED___20">__CODE_TO_BE_COMPLETED__</a>
+  <span class="keyword1">done</span>;
+  n
+
+<span class="keyword1">let</span> <a name="same_number_of_zeros_and_ones_178">same_number_of_zeros_and_ones</a> (a:<a href="array.html#array_15">array</a> int) : bool
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#num_occ_154">num_occ</a> 0 a.<a href="array.html#elts_16">elts</a> 0 a.<a href="array.html#length_17">length</a> = <a href="#num_occ_154">num_occ</a> 1 a.<a href="array.html#elts_16">elts</a> 0 a.<a href="array.html#length_17">length</a> }
+  =
+  <a href="#count_number_of_166">count_number_of</a> 0 a <a href="int.html#infix%20=_16">=</a> <a href="#count_number_of_166">count_number_of</a> 1 a
+</pre>
+<div class="info"><p>[same_number_of_zeros_and_ones a] returns [true] when [a] contains
+    exactly the same number of occurrences of [0] and of [1]</p>
+</div>
+<h3>Checking for identical sub-arrays </h3>
+
+
+
+<h4>QUESTION 8</h4>
+
+<pre><span class="keyword1">predicate</span> <a name="identical_sub_arrays_202">identical_sub_arrays</a> (a:<a href="array.html#array_15">array</a> int) (o1 o2 l:int)
+</pre>
+<div class="info"><p>[identical_sub_arrays a o1 o2 l] is true whenever the sub-arrays
+    [a[o1..o1+l-1]] and [a[o2..o2+l-1]] are point-wise identical</p>
+</div><pre>= <span class="keyword1">forall</span> k:int. <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a>
+
+</pre>
+
+<h4>QUESTION 9</h4>
+
+<pre><span class="keyword1">exception</span> <a name="DiffFound_213">DiffFound</a>
+
+<span class="keyword1">let</span> <a name="check_identical_sub_arrays_215">check_identical_sub_arrays</a> (a:<a href="array.html#array_15">array</a> int) (o1 o2 l:int) : bool
+  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#identical_sub_arrays_202">identical_sub_arrays</a> a o1 o2 l }
+= <span class="keyword1">try</span>
+    <span class="keyword1">for</span> k=0 <span class="keyword1">to</span> l<a href="int.html#infix%20-_23">-</a>1 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___16">__FORMULA_TO_BE_COMPLETED__</a> }
+      <span class="keyword1">if</span> a[o1<a href="int.html#infix%20+_19">+</a>k] <a href="int.html#infix%20=_16">&lt;&gt;</a> a[o2<a href="int.html#infix%20+_19">+</a>k] <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#DiffFound_213">DiffFound</a>
+    <span class="keyword1">done</span>;
+    True
+  <span class="keyword1">with</span> <a href="#DiffFound_213">DiffFound</a> -&gt; <span class="keyword1">false</span>
+  <span class="keyword1">end</span>
+
+<span class="keyword1">end</span>
+
+</pre>
+
+<h2>Takuzu</h2>
+
+<pre><span class="keyword1">module</span> <a name="Takuzu_">Takuzu</a>
+
+<span class="keyword1">use</span> int.<a href="int.html#Int_">Int</a>
+<span class="keyword1">use</span> array.<a href="array.html#Array_">Array</a>
+<span class="keyword1">use</span> int.<a href="int.html#ComputerDivision_">ComputerDivision</a>
+
+<span class="keyword1">predicate</span> <a name="__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+<span class="keyword1">constant</span> <a name="__TERM_TO_BE_COMPLETED___249">__TERM_TO_BE_COMPLETED__</a> : 'a
+<span class="keyword1">constant</span> <a name="__VARIANT_TO_BE_COMPLETED___250">__VARIANT_TO_BE_COMPLETED__</a> : int
+<span class="keyword1">let</span> <span class="keyword1">constant</span> <a name="__EXPRESSION_TO_BE_COMPLETED___251">__EXPRESSION_TO_BE_COMPLETED__</a> : int = 0
+<span class="keyword1">let</span> <span class="keyword1">constant</span> <a name="__CODE_TO_BE_COMPLETED___252">__CODE_TO_BE_COMPLETED__</a> : unit = ()
+
+</pre>
+
+<h3>Takuzu puzzle description</h3>
+
+<pre><span class="keyword1">type</span> <a name="elem_261">elem</a> = <a name="Zero_261">Zero</a> | <a name="One_261">One</a> | <a name="Empty_261">Empty</a>
+
+<span class="keyword1">let</span> <a name="eq_263">eq</a> (x y : <a href="#elem_261">elem</a>) : bool <span class="keyword2">ensures</span> { result = True &lt;-&gt; x = y }
+= <span class="keyword1">match</span> x,y <span class="keyword1">with</span>
+| <a href="#Empty_261">Empty</a>,<a href="#Empty_261">Empty</a>
+| <a href="#One_261">One</a>,<a href="#One_261">One</a>
+| <a href="#Zero_261">Zero</a>,<a href="#Zero_261">Zero</a> -&gt; True
+| _ -&gt; False
+<span class="keyword1">end</span>
+
+<span class="keyword1">type</span> <a name="takuzu_grid_271">takuzu_grid</a> = <a href="array.html#array_15">array</a> <a href="#elem_261">elem</a>
+
+<span class="keyword1">let</span> <span class="keyword1">function</span> <a name="column_start_index_273">column_start_index</a> (n:int) : int = <a href="int.html#mod_227">mod</a> n 8
+<span class="keyword1">let</span> <span class="keyword1">function</span> <a name="row_start_index_274">row_start_index</a> (n:int) : int = 8<a href="int.html#infix%20*_20">*</a>(<a href="int.html#div_223">div</a> n 8)
+
+<span class="keyword1">predicate</span> <a name="valid_chunk_276">valid_chunk</a> (s i:int) =
+  (i = 1 /\ 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> s <a href="int.html#infix%20%3C=_25">&lt;=</a> 56 /\ <a href="int.html#mod_181">mod</a> s 8 = 0) \/ (i = 8 /\ 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> s <a href="int.html#infix%20%3C=_25">&lt;=</a> 7)
+
+<span class="keyword1">lemma</span> <a name="valid_chunk_279">valid_chunk</a> :
+  <span class="keyword1">forall</span> s i. <a href="#valid_chunk_276">valid_chunk</a> s i -&gt;
+    <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> 8 -&gt; 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> s <a href="int.html#infix%20+_19">+</a> k<a href="int.html#infix%20*_20">*</a>i <a href="int.html#infix%20%3C_21">&lt;</a> 64
+
+<span class="keyword1">function</span> <a name="acc_283">acc</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr k : int) : <a href="#elem_261">elem</a> = g[start<a href="int.html#infix%20+_19">+</a>incr<a href="int.html#infix%20*_20">*</a>k]
+
+<span class="keyword1">let</span> <a name="acc_285">acc</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr k : int) : <a href="#elem_261">elem</a>
+  <span class="keyword2">requires</span> { g.<a href="array.html#length_17">length</a> = 64 }
+  <span class="keyword2">requires</span> { <a href="#valid_chunk_276">valid_chunk</a> start incr }
+  <span class="keyword2">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> 8 }
+  <span class="keyword2">ensures</span> { result = <a href="#acc_283">acc</a> g start incr k }
+=
+  g[start<a href="int.html#infix%20+_19">+</a>incr<a href="int.html#infix%20*_20">*</a>k]
+
+</pre>
+
+<h3>Takuzu rules</h3>
+
+<pre><span class="keyword1">exception</span> <a name="Invalid_301">Invalid</a>
+
+</pre>
+<h4>QUESTION 10</h4>
+
+<p>Rule 1 for chunks</p>
+<pre><span class="keyword1">predicate</span> <a name="no_3_consecutive_identical_elem_310">no_3_consecutive_identical_elem</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr : int) (l:int) =
+</pre>
+<div class="info"><p><code>no_3_consecutive_identical_elem g s i l</code> is true whenever in the
+    chunk <code>(s,i)</code> of grid <code>g</code>, the first <code>l</code> elements do not violate
+    the first Takuzu rule</p>
+</div><pre>   <span class="keyword1">forall</span> k:int. <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">predicate</span> <a name="rule_1_for_chunk_316">rule_1_for_chunk</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr:int) =
+</pre>
+<div class="info"><p><code>rule_1_for_chunk g s i</code> is true when rule 1 is not violated in chunk
+      <code>(s,i)</code> of grid <code>g</code></p>
+</div><pre>  <a href="#no_3_consecutive_identical_elem_310">no_3_consecutive_identical_elem</a> g start incr 8
+
+</pre>
+<h4>QUESTION 11</h4>
+<pre><span class="keyword1">let</span> <a name="check_rule_1_for_chunk_324">check_rule_1_for_chunk</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) start incr
+</pre>
+<div class="info"><p><code>check_no_3_consecutive_identical_elements g s i</code> check whether
+    the chunk <code>(s,i)</code> in grid <code>g</code> is satisfiable</p>
+</div><pre>  <span class="keyword2">requires</span> { g.<a href="array.html#length_17">length</a> = 64 }
+  <span class="keyword2">requires</span> { <a href="#valid_chunk_276">valid_chunk</a> start incr }
+  <span class="keyword2">ensures</span> { <a href="#rule_1_for_chunk_316">rule_1_for_chunk</a> g start incr }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+=
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> count_zeros = 0 <span class="keyword1">in</span>
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> count_ones = 0 <span class="keyword1">in</span>
+  <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> 7 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+    <span class="keyword1">match</span> <a href="#acc_285">acc</a> g start incr i <span class="keyword1">with</span>
+      | <a href="#Zero_261">Zero</a> -&gt;
+        <span class="keyword1">if</span> count_zeros <a href="int.html#infix%20=_16">=</a> 2 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#Invalid_301">Invalid</a> <span class="keyword1">else</span>
+           <span class="keyword1">begin</span> count_zeros &lt;- count_zeros <a href="int.html#infix%20+_19">+</a> 1; count_ones &lt;- 0 <span class="keyword1">end</span>
+      | <a href="#One_261">One</a> -&gt;
+        <span class="keyword1">if</span> count_ones <a href="int.html#infix%20=_16">=</a> 2 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#Invalid_301">Invalid</a> <span class="keyword1">else</span>
+           <span class="keyword1">begin</span> count_ones &lt;- count_ones <a href="int.html#infix%20+_19">+</a> 1; count_zeros &lt;- 0 <span class="keyword1">end</span>
+      | <a href="#Empty_261">Empty</a> -&gt; count_zeros &lt;- 0; count_ones &lt;- 0
+    <span class="keyword1">end</span>
+  <span class="keyword1">done</span>
+
+</pre>
+<p>{QUESTION 12}</p>
+<p>Rule 2 for chunks</p>
+<pre><span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">function</span> <a name="num_occ_357">num_occ</a> (e:<a href="#elem_261">elem</a>) (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr:int) (l:int)
+</pre>
+<div class="info"><p><code>num_occ e g start incr l</code> denotes the number of occurrences of <code>e</code> in the
+      <code>l</code> first elements of the chunk <code>(start,incr)</code> of the grid <code>g</code></p>
+</div><pre>  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">variant</span> { <a href="#__VARIANT_TO_BE_COMPLETED___250">__VARIANT_TO_BE_COMPLETED__</a> }
+= <span class="comment">(* CODE TO BE COMPLETED *)</span> 0
+
+<span class="keyword1">let</span> <a name="count_number_of_364">count_number_of</a> (e:<a href="#elem_261">elem</a>) (g:<a href="#takuzu_grid_271">takuzu_grid</a>) start incr : int
+</pre>
+<div class="info"><p><code>count_number_of e g start incr</code> returns the number of occurrences of <code>e</code> in the
+      chunk <code>(start,incr)</code> of the grid <code>g</code></p>
+</div><pre>  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { result = <a href="#num_occ_357">num_occ</a> e g start incr 8 }
+  =
+  <span class="keyword1">let</span> <span class="keyword1">ref</span> n = 0 <span class="keyword1">in</span>
+  <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> 7 <span class="keyword1">do</span>
+    <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+    <span class="keyword1">if</span> <a href="#eq_263">eq</a> (<a href="#acc_285">acc</a> g start incr i) e <span class="keyword1">then</span> n &lt;- n<a href="int.html#infix%20+_19">+</a>1
+  <span class="keyword1">done</span>;
+  n
+
+</pre>
+<p>{QUESTION 13}</p>
+<pre><span class="keyword1">predicate</span> <a name="rule_2_for_chunk_379">rule_2_for_chunk</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start incr:int) =
+</pre>
+<div class="info"><p><code>rule_2_for_chunk g s i</code> is true when rule 2 is not violated in chunk
+      <code>(s,i)</code> of grid <code>g</code></p>
+</div><pre>  <a href="#num_occ_357">num_occ</a> <a href="#Zero_261">Zero</a> g start incr 8 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="#__TERM_TO_BE_COMPLETED___249">__TERM_TO_BE_COMPLETED__</a> /\
+  <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">let</span> <a name="check_rule_2_for_chunk_385">check_rule_2_for_chunk</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) start incr : unit
+  <span class="keyword2">requires</span> { g.<a href="array.html#length_17">length</a> = 64 }
+  <span class="keyword2">requires</span> { <a href="#valid_chunk_276">valid_chunk</a> start incr }
+  <span class="keyword2">ensures</span> { <a href="#rule_2_for_chunk_379">rule_2_for_chunk</a> g start incr }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+  =
+  <span class="keyword1">if</span> <a href="#count_number_of_364">count_number_of</a> <a href="#Zero_261">Zero</a> g start incr <a href="int.html#infix%20%3E_24">&gt;</a> <a href="#__EXPRESSION_TO_BE_COMPLETED___251">__EXPRESSION_TO_BE_COMPLETED__</a> <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#Invalid_301">Invalid</a>;
+  <a href="#__CODE_TO_BE_COMPLETED___252">__CODE_TO_BE_COMPLETED__</a>
+
+</pre>
+<p>{QUESTION 14}</p>
+<p>Rule 3 for chunks</p>
+<pre><span class="keyword1">predicate</span> <a name="identical_chunks_405">identical_chunks</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (s1 s2:int) (incr:int) (l:int)
+</pre>
+<div class="info"><p><code>identical_chunks g s1 s2 i</code> is true whenever the chunks <code>(s1,i)</code>
+    and <code>(s2,i)</code>, in their first <code>l</code> elements, have no empty cells and
+    are pointwise identical</p>
+</div><pre>= <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> l -&gt;
+    <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">exception</span> <a name="DiffFound_412">DiffFound</a>
+
+<span class="keyword1">let</span> <a name="check_identical_chunks_414">check_identical_chunks</a> g start1 start2 incr : bool
+  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { result = True &lt;-&gt; <a href="#identical_chunks_405">identical_chunks</a> g start1 start2 incr 8 }
+= <span class="keyword1">try</span>
+    <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> 7 <span class="keyword1">do</span>
+      <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+      <span class="keyword1">match</span> <a href="#acc_285">acc</a> g start1 incr i, <a href="#acc_285">acc</a> g start2 incr i <span class="keyword1">with</span>
+      | <a href="#Zero_261">Zero</a>,<a href="#Zero_261">Zero</a> -&gt; <a href="#__CODE_TO_BE_COMPLETED___252">__CODE_TO_BE_COMPLETED__</a>
+      | <a href="#One_261">One</a>,<a href="#One_261">One</a> -&gt; <a href="#__CODE_TO_BE_COMPLETED___252">__CODE_TO_BE_COMPLETED__</a>
+      | _ -&gt; <a href="#__CODE_TO_BE_COMPLETED___252">__CODE_TO_BE_COMPLETED__</a>
+      <span class="keyword1">end</span>
+    <span class="keyword1">done</span>;
+    True
+  <span class="keyword1">with</span> <a href="#DiffFound_412">DiffFound</a> -&gt; False
+  <span class="keyword1">end</span>
+
+</pre>
+<p>{QUESTION 15}</p>
+<pre><span class="keyword1">predicate</span> <a name="identical_columns_433">identical_columns</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (s1 s2:int) =
+  <a href="#identical_chunks_405">identical_chunks</a> g s1 s2 8 8
+
+<span class="keyword1">let</span> <a name="check_rule_3_for_column_436">check_rule_3_for_column</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start:int) : unit
+  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> 8 /\ k &lt;&gt; start -&gt;
+               <span class="keyword1">not</span> (<a href="#identical_columns_433">identical_columns</a> g start k) }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+=
+  <span class="keyword1">for</span> i=0 <span class="keyword1">to</span> 7 <span class="keyword1">do</span>
+    <span class="keyword2">invariant</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+      <span class="comment">(* CODE TO BE COMPLETED *)</span><span class="keyword1">raise</span> <a href="#Invalid_301">Invalid</a>
+  <span class="keyword1">done</span>
+
+<span class="keyword1">predicate</span> <a name="identical_rows_447">identical_rows</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (s1 s2:int) =
+  <a href="#identical_chunks_405">identical_chunks</a> g s1 s2 1 8
+
+<span class="keyword1">let</span> <a name="check_rule_3_for_row_450">check_rule_3_for_row</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (start:int) : unit
+  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> 8 /\ 8<a href="int.html#infix%20*_20">*</a>k &lt;&gt; start -&gt;
+               <span class="keyword1">not</span> (<a href="#identical_rows_447">identical_rows</a> g start (8<a href="int.html#infix%20*_20">*</a>k)) }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+= <span class="comment">(* CODE TO BE COMPLETED *)</span><span class="keyword1">raise</span> <a href="#Invalid_301">Invalid</a>
+
+</pre>
+<h3>Rules satisfaction for a given cell</h3>
+<h4>QUESTION 16</h4>
+<pre><span class="keyword1">predicate</span> <a name="rule_1_for_cell_464">rule_1_for_cell</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) =
+</pre>
+<div class="info"><p><code>rule_1_for_cell g n</code> is true whenever the first Takuzu rule is
+    satisfied for the row and the column of the cell number <code>n</code></p>
+</div><pre>  <span class="keyword1">let</span> cs = <a href="#column_start_index_273">column_start_index</a> n <span class="keyword1">in</span>
+  <span class="keyword1">let</span> rs = <a href="#row_start_index_274">row_start_index</a> n <span class="keyword1">in</span>
+  <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">predicate</span> <a name="rule_2_for_cell_471">rule_2_for_cell</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) =
+</pre>
+<div class="info"><p><code>rule_2_for_cell g n</code> is true whenever the second Takuzu rule is
+    satisfied for the row and the column of the cell number <code>n</code></p>
+</div><pre>  <span class="keyword1">let</span> cs = <a href="#column_start_index_273">column_start_index</a> n <span class="keyword1">in</span>
+  <span class="keyword1">let</span> rs = <a href="#row_start_index_274">row_start_index</a> n <span class="keyword1">in</span>
+  <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">predicate</span> <a name="rule_3_for_cell_478">rule_3_for_cell</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) =
+</pre>
+<div class="info"><p><code>rule_3_for_cell g n</code> is true whenever the third Takuzu rule is
+    satisfied for the row and the column of the cell number <code>n</code></p>
+</div><pre>  <span class="keyword1">let</span> cs = <a href="#column_start_index_273">column_start_index</a> n <span class="keyword1">in</span>
+  <span class="keyword1">let</span> rs = <a href="#row_start_index_274">row_start_index</a> n <span class="keyword1">in</span>
+  <span class="keyword1">forall</span> i. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> i <a href="int.html#infix%20%3C_21">&lt;</a> 8 -&gt; <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a>
+
+<span class="keyword1">predicate</span> <a name="valid_for_cell_485">valid_for_cell</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (i:int) =
+</pre>
+<div class="info"><p><code>valid_for_cell g n</code> is true whenever cell number <code>n</code> satisfy the
+    Takuzu rules</p>
+</div><pre>  <a href="#rule_1_for_cell_464">rule_1_for_cell</a> g i /\ <a href="#rule_2_for_cell_471">rule_2_for_cell</a> g i /\ <a href="#rule_3_for_cell_478">rule_3_for_cell</a> g i
+
+<span class="keyword1">predicate</span> <a name="valid_up_to_490">valid_up_to</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int)
+</pre>
+<div class="info"><p><code>valid_up_to g n</code> is true whenever all cells with number smaller
+    than <code>n</code> satisfy the Takuzu rules</p>
+</div><pre>= <span class="keyword1">forall</span> i. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> i <a href="int.html#infix%20%3C_21">&lt;</a> n -&gt; <a href="#valid_for_cell_485">valid_for_cell</a> g i
+
+</pre>
+<h4>QUESTION 17</h4>
+<pre><span class="keyword1">let</span> <a name="check_at_cell_499">check_at_cell</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) : unit
+</pre>
+<div class="info"><p><code>check_at_cell g n</code> returns normally if the grid <code>g</code> satisfy the
+    rules for cell <code>n</code>.</p>
+</div><pre>  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { <a href="#valid_for_cell_485">valid_for_cell</a> g n }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+=
+  <span class="keyword1">let</span> col_start = <a href="#column_start_index_273">column_start_index</a> n <span class="keyword1">in</span>
+  <span class="keyword1">let</span> row_start = <a href="#row_start_index_274">row_start_index</a> n <span class="keyword1">in</span>
+  <a href="#check_rule_1_for_chunk_324">check_rule_1_for_chunk</a> g col_start 8;
+  <a href="#check_rule_1_for_chunk_324">check_rule_1_for_chunk</a> g row_start 1;
+  <a href="#check_rule_2_for_chunk_385">check_rule_2_for_chunk</a> g col_start 8;
+  <a href="#check_rule_2_for_chunk_385">check_rule_2_for_chunk</a> g row_start 1;
+  <a href="#check_rule_3_for_column_436">check_rule_3_for_column</a> g col_start;
+  <a href="#check_rule_3_for_row_450">check_rule_3_for_row</a> g row_start
+
+</pre>
+<h4>QUESTIONS 18, 19 AND 20</h4>
+<pre><span class="keyword1">let</span> <a name="check_cell_change_520">check_cell_change</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) (e:<a href="#elem_261">elem</a>) : unit
+</pre>
+<div class="info"><p><code>check_cell_change g n e</code> takes a grid <code>g</code> that satisfies the
+    rules up to cell <code>n</code> (not included).  it sets cell <code>n</code> to the
+    given value <code>e</code> and checks if the rules are still satisfied for
+    cell <code>n</code> and returns normally. It raises exception <code>Invalid</code> if
+    any check fails. It should be used incrementally, as it assumes
+    that the rules are already satisfied for cell whose number is
+    strictly smaller than <code>n</code>.</p>
+</div><pre>  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">requires</span> { <a href="#valid_up_to_490">valid_up_to</a> (g[n&lt;-<a href="#Empty_261">Empty</a>]) n }
+  <span class="keyword2">writes</span> { g }
+  <span class="keyword2">ensures</span> { <a href="#valid_up_to_490">valid_up_to</a> g (n<a href="int.html#infix%20+_19">+</a>1) }
+  <span class="keyword2">raises</span> { <a href="#Invalid_301">Invalid</a> -&gt; <span class="keyword1">true</span> }
+=
+  g[n] &lt;- e;
+  <span class="keyword2">assert</span> { <a href="#valid_up_to_490">valid_up_to</a> g[n&lt;-<a href="#Empty_261">Empty</a>] n };
+  <a href="#check_at_cell_499">check_at_cell</a> g n
+
+</pre>
+<h3>The main algorithm</h3>
+<pre><span class="keyword1">predicate</span> <a name="full_up_to_545">full_up_to</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int)
+</pre>
+<div class="info"><p><code>full_up_to g n</code> is true whenever all the cells lower than <code>n</code> are
+    non-empty</p>
+</div><pre>= <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> n -&gt; g[k] &lt;&gt; <a href="#Empty_261">Empty</a>
+
+<span class="keyword1">predicate</span> <a name="extends_550">extends</a> (g1:<a href="#takuzu_grid_271">takuzu_grid</a>) (g2:<a href="#takuzu_grid_271">takuzu_grid</a>)
+</pre>
+<div class="info"><p><code>extends g1 g2</code> is true when <code>g2</code> is an extension of <code>g1</code>, that is
+    all non-empty cells of <code>g1</code> are non-empty in <code>g2</code> and with the
+    same value.</p>
+</div><pre>= <span class="keyword1">forall</span> k. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> 64 -&gt; g1[k] &lt;&gt; <a href="#Empty_261">Empty</a> -&gt; g2[k] = g1[k]
+
+</pre>
+<h4>QUESTION 21</h4>
+<pre><span class="keyword1">exception</span> <a name="SolutionFound_562">SolutionFound</a>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="solve_aux_565">solve_aux</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) (n:int) : unit
+  <span class="keyword2">requires</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">requires</span> { <a href="#full_up_to_545">full_up_to</a> g n }
+  <span class="keyword2">requires</span> { <a href="#valid_up_to_490">valid_up_to</a> g n }
+  <span class="keyword2">writes</span> { g }
+  <span class="keyword2">variant</span> { <a href="#__VARIANT_TO_BE_COMPLETED___250">__VARIANT_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">ensures</span> { <a href="#__FORMULA_TO_BE_COMPLETED___248">__FORMULA_TO_BE_COMPLETED__</a> }
+  <span class="keyword2">raises</span> { <a href="#SolutionFound_562">SolutionFound</a> -&gt; <a href="#extends_550">extends</a> (<span class="keyword1">old</span> g) g /\ <a href="#full_up_to_545">full_up_to</a> g 64 /\ <a href="#valid_up_to_490">valid_up_to</a> g 64 }
+=
+  <span class="keyword1">if</span> n<a href="int.html#infix%20=_16">=</a>64 <span class="keyword1">then</span> <span class="keyword1">raise</span> <a href="#SolutionFound_562">SolutionFound</a>;
+  <span class="keyword1">match</span> g[n] <span class="keyword1">with</span>
+  | <a href="#Zero_261">Zero</a> | <a href="#One_261">One</a> -&gt;
+    <span class="keyword1">try</span>
+      <a href="#check_at_cell_499">check_at_cell</a> g n; solve_aux g (n<a href="int.html#infix%20+_19">+</a>1)
+    <span class="keyword1">with</span> <a href="#Invalid_301">Invalid</a> -&gt; ()
+    <span class="keyword1">end</span>
+  | <a href="#Empty_261">Empty</a> -&gt;
+    <span class="keyword1">try</span>
+      <a href="#check_cell_change_520">check_cell_change</a> g n <a href="#Zero_261">Zero</a>;
+      solve_aux g (n<a href="int.html#infix%20+_19">+</a>1)
+    <span class="keyword1">with</span> <a href="#Invalid_301">Invalid</a> -&gt; ()
+    <span class="keyword1">end</span>;
+    <span class="keyword1">try</span>
+      <a href="#check_cell_change_520">check_cell_change</a> g n <a href="#One_261">One</a>;
+      solve_aux g (n<a href="int.html#infix%20+_19">+</a>1)
+    <span class="keyword1">with</span> <a href="#Invalid_301">Invalid</a> -&gt; ()
+    <span class="keyword1">end</span>;
+    g[n] &lt;- <a href="#Empty_261">Empty</a>
+  <span class="keyword1">end</span>
+
+<span class="keyword1">exception</span> <a name="NoSolution_596">NoSolution</a>
+
+<span class="keyword1">let</span> <a name="solve_598">solve</a> (g:<a href="#takuzu_grid_271">takuzu_grid</a>) : unit
+  <span class="keyword2">requires</span> { g.<a href="array.html#length_17">length</a> = 64 }
+  <span class="keyword2">ensures</span> { <a href="#full_up_to_545">full_up_to</a> g 64 }
+  <span class="keyword2">ensures</span> { <a href="#extends_550">extends</a> (<span class="keyword1">old</span> g) g }
+  <span class="keyword2">ensures</span> { <a href="#valid_up_to_490">valid_up_to</a> g 64 }
+  <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+=
+  <span class="keyword1">try</span>
+    <a href="#solve_aux_565">solve_aux</a> g 0;
+    <span class="keyword1">raise</span> <a href="#NoSolution_596">NoSolution</a>
+  <span class="keyword1">with</span> <a href="#SolutionFound_562">SolutionFound</a> -&gt; ()
+  <span class="keyword1">end</span>
+
+<span class="keyword1">end</span>
+
+</pre>
+<h2>Some Tests</h2>
+<pre><span class="keyword1">module</span> <a name="Test_">Test</a>
+
+  <span class="keyword1">use</span> array.<a href="array.html#Array_">Array</a>
+  <span class="keyword1">use</span> <a href="#Takuzu_">Takuzu</a>
+
+  <span class="keyword1">let</span> <a name="empty_624">empty</a> () : <a href="#takuzu_grid_271">takuzu_grid</a>
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+</pre>
+<div class="info"><p>Solving the empty grid: easy, yet not trivial</p>
+</div><p>Other examples</p>
+<pre>  <span class="keyword1">let</span> <a name="example1_632">example1</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[2] &lt;- <a href="#Zero_261">Zero</a>;
+    a[5] &lt;- <a href="#One_261">One</a>;
+    a[8] &lt;- <a href="#One_261">One</a>;
+    a[22] &lt;- <a href="#Zero_261">Zero</a>;
+    a[25] &lt;- <a href="#Zero_261">Zero</a>;
+    a[27] &lt;- <a href="#Zero_261">Zero</a>;
+    a[28] &lt;- <a href="#Zero_261">Zero</a>;
+    a[30] &lt;- <a href="#Zero_261">Zero</a>;
+    a[41] &lt;- <a href="#Zero_261">Zero</a>;
+    a[42] &lt;- <a href="#Zero_261">Zero</a>;
+    a[44] &lt;- <a href="#Zero_261">Zero</a>;
+    a[50] &lt;- <a href="#Zero_261">Zero</a>;
+    a[52] &lt;- <a href="#One_261">One</a>;
+    a[56] &lt;- <a href="#One_261">One</a>;
+    a[62] &lt;- <a href="#Zero_261">Zero</a>;
+    a[63] &lt;- <a href="#Zero_261">Zero</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+  <span class="keyword1">let</span> <a name="example2_654">example2</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[4] &lt;- <a href="#Zero_261">Zero</a>;
+    a[8] &lt;- <a href="#One_261">One</a>;
+    a[13] &lt;- <a href="#Zero_261">Zero</a>;
+    a[14] &lt;- <a href="#One_261">One</a>;
+    a[22] &lt;- <a href="#One_261">One</a>;
+    a[25] &lt;- <a href="#One_261">One</a>;
+    a[28] &lt;- <a href="#One_261">One</a>;
+    a[33] &lt;- <a href="#One_261">One</a>;
+    a[46] &lt;- <a href="#Zero_261">Zero</a>;
+    a[47] &lt;- <a href="#Zero_261">Zero</a>;
+    a[52] &lt;- <a href="#One_261">One</a>;
+    a[55] &lt;- <a href="#Zero_261">Zero</a>;
+    a[57] &lt;- <a href="#Zero_261">Zero</a>;
+    a[58] &lt;- <a href="#Zero_261">Zero</a>;
+    a[60] &lt;- <a href="#One_261">One</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+<span class="keyword1">let</span> <a name="example3_675">example3</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[1] &lt;- <a href="#Zero_261">Zero</a>;
+    a[3] &lt;- <a href="#Zero_261">Zero</a>;
+    a[7] &lt;- <a href="#Zero_261">Zero</a>;
+    a[12] &lt;- <a href="#One_261">One</a>;
+    a[18] &lt;- <a href="#One_261">One</a>;
+    a[23] &lt;- <a href="#Zero_261">Zero</a>;
+    a[25] &lt;- <a href="#One_261">One</a>;
+    a[37] &lt;- <a href="#One_261">One</a>;
+    a[40] &lt;- <a href="#Zero_261">Zero</a>;
+    a[46] &lt;- <a href="#Zero_261">Zero</a>;
+    a[51] &lt;- <a href="#One_261">One</a>;
+    a[53] &lt;- <a href="#Zero_261">Zero</a>;
+    a[54] &lt;- <a href="#Zero_261">Zero</a>;
+    a[57] &lt;- <a href="#Zero_261">Zero</a>;
+    a[60] &lt;- <a href="#One_261">One</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+<span class="keyword1">let</span> <a name="example4_696">example4</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[1] &lt;- <a href="#One_261">One</a>;
+    a[2] &lt;- <a href="#One_261">One</a>;
+    a[5] &lt;- <a href="#One_261">One</a>;
+    a[7] &lt;- <a href="#Zero_261">Zero</a>;
+    a[9] &lt;- <a href="#Zero_261">Zero</a>;
+    a[11] &lt;- <a href="#Zero_261">Zero</a>;
+    a[21] &lt;- <a href="#One_261">One</a>;
+    a[23] &lt;- <a href="#Zero_261">Zero</a>;
+    a[34] &lt;- <a href="#Zero_261">Zero</a>;
+    a[38] &lt;- <a href="#One_261">One</a>;
+    a[40] &lt;- <a href="#Zero_261">Zero</a>;
+    a[44] &lt;- <a href="#Zero_261">Zero</a>;
+    a[47] &lt;- <a href="#Zero_261">Zero</a>;
+    a[53] &lt;- <a href="#One_261">One</a>;
+    a[55] &lt;- <a href="#One_261">One</a>;
+    a[56] &lt;- <a href="#Zero_261">Zero</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+<span class="keyword1">let</span> <a name="example5_718">example5</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[7] &lt;- <a href="#Zero_261">Zero</a>;
+    a[15] &lt;- <a href="#One_261">One</a>;
+    a[21] &lt;- <a href="#Zero_261">Zero</a>;
+    a[24] &lt;- <a href="#Zero_261">Zero</a>;
+    a[39] &lt;- <a href="#Zero_261">Zero</a>;
+    a[45] &lt;- <a href="#One_261">One</a>;
+    a[46] &lt;- <a href="#One_261">One</a>;
+    a[50] &lt;- <a href="#One_261">One</a>;
+    a[54] &lt;- <a href="#One_261">One</a>;
+    a[56] &lt;- <a href="#One_261">One</a>;
+    a[59] &lt;- <a href="#Zero_261">Zero</a>;
+    a[60] &lt;- <a href="#Zero_261">Zero</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+<span class="keyword1">let</span> <a name="example6_737">example6</a> ()
+    <span class="keyword2">raises</span> { <a href="#NoSolution_596">NoSolution</a> -&gt; <span class="keyword1">true</span> }
+  = <span class="keyword1">let</span> a = Array.<a href="array.html#make_52">make</a> 64 <a href="#Empty_261">Empty</a> <span class="keyword1">in</span>
+    a[0] &lt;- <a href="#One_261">One</a>;
+    a[2] &lt;- <a href="#One_261">One</a>;
+    a[7] &lt;- <a href="#One_261">One</a>;
+    a[11] &lt;- <a href="#One_261">One</a>;
+    a[20] &lt;- <a href="#Zero_261">Zero</a>;
+    a[30] &lt;- <a href="#One_261">One</a>;
+    a[32] &lt;- <a href="#One_261">One</a>;
+    a[37] &lt;- <a href="#Zero_261">Zero</a>;
+    a[47] &lt;- <a href="#Zero_261">Zero</a>;
+    a[50] &lt;- <a href="#One_261">One</a>;
+    a[53] &lt;- <a href="#Zero_261">Zero</a>;
+    a[54] &lt;- <a href="#One_261">One</a>;
+    a[57] &lt;- <a href="#Zero_261">Zero</a>;
+    a[58] &lt;- <a href="#Zero_261">Zero</a>;
+    a[62] &lt;- <a href="#One_261">One</a>;
+    Takuzu.<a href="#solve_598">solve</a> a;
+    a
+
+<span class="keyword1">end</span>
+</pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.3.3</p>
+</body>
+</html>
