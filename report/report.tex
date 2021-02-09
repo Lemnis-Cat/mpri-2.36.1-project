@@ -2,12 +2,26 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[english]{babel}
-\usepackage[hidelinks]{hyperref}
-\usepackage{enumitem}
-\usepackage{minted}
+\usepackage[main=english,french]{babel}
 
-\title{{\normalsize \textsc{MPRI 2.36.1 --- Proof of Programs}}\\
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=magenta,      
+  urlcolor=cyan,
+}
+
+\usepackage{enumitem}
+
+\usepackage{minted}
+\usemintedstyle{emacs}
+
+\usepackage{amsthm, amsmath, amssymb}
+
+\usepackage[margin=2cm]{geometry}
+
+\title{{\normalsize \textsc{MPRI 2.36.1 --- Proof of Program}}\\
   Solving Takuzu puzzles
 }
 \author{Jules Saget}
@@ -17,6 +31,23 @@
 
 \maketitle
 
+\section{Introduction}
+\label{sec:intro}
+
+The present document is the report of my submission for the programming project
+of the MPRI\footnote{\emph{Master Parisien de Recherche en Informatique}
+  (Parisian Master of Research in Computer Science)} course ``Proof of
+Program''\footnote{\url{https://marche.gitlabpages.inria.fr/lecture-deductive-verif/}}.
+Both the
+subject\footnote{\url{https://marche.gitlabpages.inria.fr/lecture-deductive-verif/takuzu.pdf}}
+and a skeleton
+file\footnote{\url{https://marche.gitlabpages.inria.fr/lecture-deductive-verif/takuzu.zip}}
+can be found on the course web page.
+
+My submission, as well as this report, can be found on
+GitHub\footnote{\url{https://github.com/Lemnis-Cat/mpri-2.36.1-project}}.
+A documented version of my code is also provided in appendix~\ref{solving-takuzu-puzzles}
+
 \tableofcontents
 
 \section{Appetizers: Basic Functions on Arrays}
@@ -25,8 +56,104 @@
 \subsection{Check for consecutive zeros}
 
 \begin{enumerate}
-\item Because this implementation is simple and follows the definition closely,
-  choosing the right loop invariant was easy.
+\item The predicate \texttt{no\_3\_consecutive\_zeros\_sub} is simply the
+  following:
+  \begin{align*}
+         & \mathtt{no\_3\_consecutive\_zeros\_sub}(a,l)\\
+    \iff & \forall i\in\mathbb{N}, 0 \leq i < l-2 \implies \neg(a[i] \wedge a[i+1] \wedge a[i+2])
+  \end{align*}
+
+  The predicate \texttt{no\_3\_consecutive\_zeros} derives naturally:
+  \begin{align*}
+         & \mathtt{no\_3\_consecutive\_zeros}(a) \\
+    \iff & \mathtt{no\_3\_consecutive\_zeros\_sub}\left(a, \mathtt{Array.length}(a)\right)
+  \end{align*}
+
+\item For this function, the given implementation was (also shown
+  in~\ref{question-2}):
+\begin{minted}{ocaml}
+let no_3_consecutive_zeros_version_1 a =
+  try
+    for i=0 to Array.length a - 3 do
+      if a[i] = 0 && a[i+1] = 0 && a[i+2] = 0 then raise TripleFound;
+    done;
+    True
+  with TripleFound -> False
+  end
+\end{minted}
+  The contract of this function is:
+  \mint{ocaml}|result = True <-> no_3_consecutive_zeros a|
+  It captures the fact that this function checks whether the array has no three
+  consecutive zeros.
+  
+  To prove this code  correct, I need to add this loop invariant:
+  \mint{coq}|no_3_consecutive_zeros_sub a (i+2)|
+  This invariant capture the fact that the sub array the program already
+  checked has no three consecutive zeros.
+  It is initially true because the antecedent of the predicate is always false
+  (when $i=2$ there is no $j$ such that $0 \leq j < i-2$).
+  It is preserved at each iteration because the algorithm performs the only test
+  that decides $\mathtt{no\_3\_consecutive\_zeros\_sub a (i+3)}$ and is not
+  decided by $\mathtt{no\_3\_consecutive\_zeros\_sub a (i+2)}$.
+
+  The post-condition then follows by definition of $\mathtt{no\_3\_consecutive\_zeros}$.
+
+
+\item This function is implemented as follows (also shown in~\ref{question-3}):
+\begin{minted}{ocaml}
+let no_3_consecutive_zeros_version_2 a =
+  if a.length < 3 then True else
+  let ref last2 = a[0] in
+  let ref last1 = a[1] in
+  try
+    for i=2 to Array.length a - 1 do
+      let v = a[i] in
+      if v = 0 && last1 = 0 && last2 = 0 then raise TripleFound;
+      last2 <- last1;
+      last1 <- v;
+    done;
+    True
+  with TripleFound -> False
+  end
+\end{minted}
+  This function is very similar to the one before, and simply has a little
+  performance upgrade.
+
+  The contract of this function is the same as before.
+  To prove it correct, I specified the meaning of \texttt{last1} and
+  \texttt{last2}:
+  \mint{coq}|last1=a[i-1] /\ last2=a[i-2] /\ no_3_consecutive_zeros_sub a i|
+  The loop invariant is obviously initially true and preserved at each
+  iteration, thus the post-condition holds.
+
+
+\item This function is implemented as follows (also shown in~\ref{question-4}):
+\begin{minted}{ocaml}
+let no_3_consecutive_zeros_version_3 a =
+  let ref count_zeros = 0 in
+  try
+    for i=0 to Array.length a - 1 do
+      if a[i] = 0 then
+        if count_zeros = 2 then raise TripleFound
+        else count_zeros <- count_zeros + 1
+      else count_zeros <- 0
+    done;
+    True
+  with TripleFound -> False
+\end{minted}
+  The contract of this function is the same as before.
+  To prove it correct, I needed a loop invariant that captured the precise
+  meaning of \texttt{count\_zeros}:
+\begin{minted}{coq}
+0 <= count_zeros <= 2 /\
+count_zeros <= i /\
+(count_zeros = 1 -> a[i-1] = 0) /\
+(i > 0 -> (a[i-1] = 0 -> count_zeros >= 1)) /\
+(i > 1 -> (a[i-1] = 0 = a[i-2] <-> count_zeros = 2)) /\
+(a[i] = 0 /\ count_zeros = 2 -> not no_3_consecutive_zeros_sub a (i+1)) /\
+no_3_consecutive_zeros_sub a i
+\end{minted}
+
 \end{enumerate}
 
 \newpage

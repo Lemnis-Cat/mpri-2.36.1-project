@@ -80,8 +80,8 @@ let no_3_consecutive_zeros_version_2 (a : array int) : bool
   try
     for i=2 to Array.length a - 1 do
       invariant {
-        last1=a[i-1] /\
-        last2=a[i-2] /\
+        last1 = a[i-1] /\
+        last2 = a[i-2] /\
         no_3_consecutive_zeros_sub a i
       }
       let v = a[i] in
