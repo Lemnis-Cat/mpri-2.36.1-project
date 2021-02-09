@@ -1,0 +1,37 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{minted}
+
+\title{{\normalsize \textsc{MPRI 2.36.1 --- Proof of Programs}}\\
+  Solving Takuzu puzzles
+}
+\author{Jules Saget}
+\date{February 25, 2021}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Appetizers: Basic Functions on Arrays}
+\label{sec:appetizers}
+
+\subsection{Check for consecutive zeros}
+
+\begin{enumerate}
+\item Because this implementation is simple and follows the definition closely,
+  choosing the right loop invariant was easy.
+\end{enumerate}
+
+\newpage
+
+\appendix
+\input{code/all.tex}
+
+\end{document}

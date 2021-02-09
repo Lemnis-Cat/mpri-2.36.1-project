@@ -1,0 +1,796 @@
+\hypertarget{solving-takuzu-puzzles}{%
+\section{Solving Takuzu Puzzles}\label{solving-takuzu-puzzles}}
+
+MPRI course 2-36-1 Proof of Programs - Project 2020-2021
+
+\hypertarget{appetizers}{%
+\subsection{Appetizers}\label{appetizers}}
+
+Some simple functions on arrays of integers
+
+\begin{minted}{ocaml}
+module Appetizers
+
+predicate __FORMULA_TO_BE_COMPLETED__
+constant __TERM_TO_BE_COMPLETED__ : 'a
+constant __VARIANT_TO_BE_COMPLETED__ : int
+let constant __EXPRESSION_TO_BE_COMPLETED__ : int = 0
+let constant __CODE_TO_BE_COMPLETED__ : unit = ()
+
+use int.Int
+use array.Array
+\end{minted}
+
+\hypertarget{checking-if-in-an-array-there-is-never-3-consecutive-zeros}{%
+\subsubsection{Checking if in an array there is never 3 consecutive
+zeros}\label{checking-if-in-an-array-there-is-never-3-consecutive-zeros}}
+
+\hypertarget{question-1}{%
+\paragraph{QUESTION 1}\label{question-1}}
+
+Specification of the first check
+
+\begin{minted}{ocaml}
+predicate no_3_consecutive_zeros_sub (a:array int) (l:int) =
+  forall i. 0 <= i < l-2 -> not (a[i] = a[i+1] = a[i+2] = 0)
+\end{minted}
+
+{[}no\_3\_consecutive\_zeros\_sub a l{]} is true whenever in the
+sub-array {[}a{[}0..l-1{]}{]}, there are no 3 consecutives occurrences
+of {[}0{]}
+
+\begin{minted}{ocaml}
+predicate no_3_consecutive_zeros (a:array int) =
+  no_3_consecutive_zeros_sub a (Array.length a)
+\end{minted}
+
+\hypertarget{question-2}{%
+\paragraph{QUESTION 2}\label{question-2}}
+
+implementation 1
+
+\begin{minted}{ocaml}
+exception TripleFound
+
+let no_3_consecutive_zeros_version_1 (a : array int) : bool
+  ensures { result = True <-> no_3_consecutive_zeros a }
+  =
+  try
+    for i=0 to Array.length a - 3 do
+      invariant { no_3_consecutive_zeros_sub a (i+2) }
+      if a[i] = 0 && a[i+1] = 0 && a[i+2] = 0 then raise TripleFound;
+    done;
+    True
+  with TripleFound -> False
+  end
+\end{minted}
+
+\hypertarget{question-3}{%
+\paragraph{QUESTION 3}\label{question-3}}
+
+implementation 2
+
+\begin{minted}{ocaml}
+let no_3_consecutive_zeros_version_2 (a : array int) : bool
+  ensures { result = True <-> no_3_consecutive_zeros a }
+  =
+  if a.length < 3 then True else
+  let ref last2 = a[0] in
+  let ref last1 = a[1] in
+  try
+    for i=2 to Array.length a - 1 do
+      invariant {
+        last1=a[i-1] /\
+        last2=a[i-2] /\
+        no_3_consecutive_zeros_sub a i
+      }
+      let v = a[i] in
+      if v = 0 && last1 = 0 && last2 = 0 then raise TripleFound;
+      last2 <- last1;
+      last1 <- v;
+    done;
+    True
+  with TripleFound -> False
+  end
+\end{minted}
+
+\hypertarget{question-4}{%
+\paragraph{QUESTION 4}\label{question-4}}
+
+implementation 3
+
+\begin{minted}{ocaml}
+let no_3_consecutive_zeros_version_3 (a : array int) : bool
+  ensures { result = True <-> no_3_consecutive_zeros a }
+  =
+  let ref count_zeros = 0 in
+  try
+    for i=0 to Array.length a - 1 do
+      invariant {
+        0 <= count_zeros <= 2 /\
+        count_zeros <= i /\
+        (count_zeros = 1 -> a[i-1] = 0) /\
+        (i > 0 -> (a[i-1] = 0 -> count_zeros >= 1)) /\
+        (i > 1 -> (a[i-1] = 0 = a[i-2] <-> count_zeros = 2)) /\
+        (a[i] = 0 /\ count_zeros = 2 -> not no_3_consecutive_zeros_sub a (i+1)) /\
+        no_3_consecutive_zeros_sub a i
+        }
+      if a[i] = 0 then
+        if count_zeros = 2 then raise TripleFound
+        else count_zeros <- count_zeros + 1
+      else count_zeros <- 0
+    done;
+    True
+  with TripleFound -> False
+  end
+\end{minted}
+
+\hypertarget{checking-if-an-array-contains-as-many-zeros-and-ones}{%
+\subsubsection{Checking if an array contains as many zeros and
+ones}\label{checking-if-an-array-contains-as-many-zeros-and-ones}}
+
+\hypertarget{question-5}{%
+\paragraph{QUESTION 5}\label{question-5}}
+
+\begin{minted}{ocaml}
+let rec ghost function num_occ (e:int) (f:int -> int) (i j :int) : int
+\end{minted}
+
+number of \texttt{l}, \texttt{i\ \textless{}=\ l\ \textless{}\ j}, such
+that \texttt{f\ l} is equal to \texttt{e}
+
+\begin{minted}{ocaml}
+  variant { __VARIANT_TO_BE_COMPLETED__ }
+  = if __FORMULA_TO_BE_COMPLETED__ then 0 else
+    if __FORMULA_TO_BE_COMPLETED__ then 1 + num_occ e f i (j-1) else num_occ e f i (j-1)
+\end{minted}
+
+\hypertarget{questions-6-and-7}{%
+\paragraph{QUESTIONS 6 and 7}\label{questions-6-and-7}}
+
+\begin{minted}{ocaml}
+let count_number_of (e:int) (a:array int) : int
+  ensures { __FORMULA_TO_BE_COMPLETED__ }
+  =
+  let ref n = 0 in
+  for i=0 to a.length - 1 do
+    invariant { __FORMULA_TO_BE_COMPLETED__ }
+    __CODE_TO_BE_COMPLETED__
+  done;
+  n
+
+let same_number_of_zeros_and_ones (a:array int) : bool
+  ensures { result = True <-> num_occ 0 a.elts 0 a.length = num_occ 1 a.elts 0 a.length }
+  =
+  count_number_of 0 a = count_number_of 1 a
+\end{minted}
+
+{[}same\_number\_of\_zeros\_and\_ones a{]} returns {[}true{]} when
+{[}a{]} contains exactly the same number of occurrences of {[}0{]} and
+of {[}1{]}
+
+\hypertarget{checking-for-identical-sub-arrays}{%
+\subsubsection{Checking for identical
+sub-arrays}\label{checking-for-identical-sub-arrays}}
+
+\hypertarget{question-8}{%
+\paragraph{QUESTION 8}\label{question-8}}
+
+\begin{minted}{ocaml}
+predicate identical_sub_arrays (a:array int) (o1 o2 l:int)
+\end{minted}
+
+{[}identical\_sub\_arrays a o1 o2 l{]} is true whenever the sub-arrays
+{[}a{[}o1..o1+l-1{]}{]} and {[}a{[}o2..o2+l-1{]}{]} are point-wise
+identical
+
+\begin{minted}{ocaml}
+= forall k:int. __FORMULA_TO_BE_COMPLETED__
+\end{minted}
+
+\hypertarget{question-9}{%
+\paragraph{QUESTION 9}\label{question-9}}
+
+\begin{minted}{ocaml}
+exception DiffFound
+
+let check_identical_sub_arrays (a:array int) (o1 o2 l:int) : bool
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { result = True <-> identical_sub_arrays a o1 o2 l }
+= try
+    for k=0 to l-1 do
+      invariant { __FORMULA_TO_BE_COMPLETED__ }
+      if a[o1+k] <> a[o2+k] then raise DiffFound
+    done;
+    True
+  with DiffFound -> false
+  end
+
+end
+\end{minted}
+
+\hypertarget{takuzu}{%
+\subsection{Takuzu}\label{takuzu}}
+
+\begin{minted}{ocaml}
+module Takuzu
+
+use int.Int
+use array.Array
+use int.ComputerDivision
+
+predicate __FORMULA_TO_BE_COMPLETED__
+constant __TERM_TO_BE_COMPLETED__ : 'a
+constant __VARIANT_TO_BE_COMPLETED__ : int
+let constant __EXPRESSION_TO_BE_COMPLETED__ : int = 0
+let constant __CODE_TO_BE_COMPLETED__ : unit = ()
+\end{minted}
+
+\hypertarget{takuzu-puzzle-description}{%
+\subsubsection{Takuzu puzzle
+description}\label{takuzu-puzzle-description}}
+
+\begin{minted}{ocaml}
+type elem = Zero | One | Empty
+
+let eq (x y : elem) : bool ensures { result = True <-> x = y }
+= match x,y with
+| Empty,Empty
+| One,One
+| Zero,Zero -> True
+| _ -> False
+end
+
+type takuzu_grid = array elem
+
+let function column_start_index (n:int) : int = mod n 8
+let function row_start_index (n:int) : int = 8*(div n 8)
+
+predicate valid_chunk (s i:int) =
+  (i = 1 /\ 0 <= s <= 56 /\ mod s 8 = 0) \/ (i = 8 /\ 0 <= s <= 7)
+
+lemma valid_chunk :
+  forall s i. valid_chunk s i ->
+    forall k. 0 <= k < 8 -> 0 <= s + k*i < 64
+
+function acc (g:takuzu_grid) (start incr k : int) : elem = g[start+incr*k]
+
+let acc (g:takuzu_grid) (start incr k : int) : elem
+  requires { g.length = 64 }
+  requires { valid_chunk start incr }
+  requires { 0 <= k < 8 }
+  ensures { result = acc g start incr k }
+=
+  g[start+incr*k]
+\end{minted}
+
+\hypertarget{takuzu-rules}{%
+\subsubsection{Takuzu rules}\label{takuzu-rules}}
+
+\begin{minted}{ocaml}
+exception Invalid
+\end{minted}
+
+\hypertarget{question-10}{%
+\paragraph{QUESTION 10}\label{question-10}}
+
+Rule 1 for chunks
+
+\begin{minted}{ocaml}
+predicate no_3_consecutive_identical_elem (g:takuzu_grid) (start incr : int) (l:int) =
+\end{minted}
+
+\texttt{no\_3\_consecutive\_identical\_elem\ g\ s\ i\ l} is true
+whenever in the chunk \texttt{(s,i)} of grid \texttt{g}, the first
+\texttt{l} elements do not violate the first Takuzu rule
+
+\begin{minted}{ocaml}
+   forall k:int. __FORMULA_TO_BE_COMPLETED__
+
+predicate rule_1_for_chunk (g:takuzu_grid) (start incr:int) =
+\end{minted}
+
+\texttt{rule\_1\_for\_chunk\ g\ s\ i} is true when rule 1 is not
+violated in chunk \texttt{(s,i)} of grid \texttt{g}
+
+\begin{minted}{ocaml}
+  no_3_consecutive_identical_elem g start incr 8
+\end{minted}
+
+\hypertarget{question-11}{%
+\paragraph{QUESTION 11}\label{question-11}}
+
+\begin{minted}{ocaml}
+let check_rule_1_for_chunk (g:takuzu_grid) start incr
+\end{minted}
+
+\texttt{check\_no\_3\_consecutive\_identical\_elements\ g\ s\ i} check
+whether the chunk \texttt{(s,i)} in grid \texttt{g} is satisfiable
+
+\begin{minted}{ocaml}
+  requires { g.length = 64 }
+  requires { valid_chunk start incr }
+  ensures { rule_1_for_chunk g start incr }
+  raises { Invalid -> true }
+=
+  let ref count_zeros = 0 in
+  let ref count_ones = 0 in
+  for i=0 to 7 do
+      invariant { __FORMULA_TO_BE_COMPLETED__ }
+    match acc g start incr i with
+      | Zero ->
+        if count_zeros = 2 then raise Invalid else
+           begin count_zeros <- count_zeros + 1; count_ones <- 0 end
+      | One ->
+        if count_ones = 2 then raise Invalid else
+           begin count_ones <- count_ones + 1; count_zeros <- 0 end
+      | Empty -> count_zeros <- 0; count_ones <- 0
+    end
+  done
+\end{minted}
+
+\{QUESTION 12\}
+
+Rule 2 for chunks
+
+\begin{minted}{ocaml}
+let rec function num_occ (e:elem) (g:takuzu_grid) (start incr:int) (l:int)
+\end{minted}
+
+\texttt{num\_occ\ e\ g\ start\ incr\ l} denotes the number of
+occurrences of \texttt{e} in the \texttt{l} first elements of the chunk
+\texttt{(start,incr)} of the grid \texttt{g}
+
+\begin{minted}{ocaml}
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  variant { __VARIANT_TO_BE_COMPLETED__ }
+= (* CODE TO BE COMPLETED *) 0
+
+let count_number_of (e:elem) (g:takuzu_grid) start incr : int
+\end{minted}
+
+\texttt{count\_number\_of\ e\ g\ start\ incr} returns the number of
+occurrences of \texttt{e} in the chunk \texttt{(start,incr)} of the grid
+\texttt{g}
+
+\begin{minted}{ocaml}
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { result = num_occ e g start incr 8 }
+  =
+  let ref n = 0 in
+  for i=0 to 7 do
+    invariant { __FORMULA_TO_BE_COMPLETED__ }
+    if eq (acc g start incr i) e then n <- n+1
+  done;
+  n
+\end{minted}
+
+\{QUESTION 13\}
+
+\begin{minted}{ocaml}
+predicate rule_2_for_chunk (g:takuzu_grid) (start incr:int) =
+\end{minted}
+
+\texttt{rule\_2\_for\_chunk\ g\ s\ i} is true when rule 2 is not
+violated in chunk \texttt{(s,i)} of grid \texttt{g}
+
+\begin{minted}{ocaml}
+  num_occ Zero g start incr 8 <= __TERM_TO_BE_COMPLETED__ /\
+  __FORMULA_TO_BE_COMPLETED__
+
+let check_rule_2_for_chunk (g:takuzu_grid) start incr : unit
+  requires { g.length = 64 }
+  requires { valid_chunk start incr }
+  ensures { rule_2_for_chunk g start incr }
+  raises { Invalid -> true }
+  =
+  if count_number_of Zero g start incr > __EXPRESSION_TO_BE_COMPLETED__ then raise Invalid;
+  __CODE_TO_BE_COMPLETED__
+\end{minted}
+
+\{QUESTION 14\}
+
+Rule 3 for chunks
+
+\begin{minted}{ocaml}
+predicate identical_chunks (g:takuzu_grid) (s1 s2:int) (incr:int) (l:int)
+\end{minted}
+
+\texttt{identical\_chunks\ g\ s1\ s2\ i} is true whenever the chunks
+\texttt{(s1,i)} and \texttt{(s2,i)}, in their first \texttt{l} elements,
+have no empty cells and are pointwise identical
+
+\begin{minted}{ocaml}
+= forall k. 0 <= k < l ->
+    __FORMULA_TO_BE_COMPLETED__
+
+exception DiffFound
+
+let check_identical_chunks g start1 start2 incr : bool
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { result = True <-> identical_chunks g start1 start2 incr 8 }
+= try
+    for i=0 to 7 do
+      invariant { __FORMULA_TO_BE_COMPLETED__ }
+      match acc g start1 incr i, acc g start2 incr i with
+      | Zero,Zero -> __CODE_TO_BE_COMPLETED__
+      | One,One -> __CODE_TO_BE_COMPLETED__
+      | _ -> __CODE_TO_BE_COMPLETED__
+      end
+    done;
+    True
+  with DiffFound -> False
+  end
+\end{minted}
+
+\{QUESTION 15\}
+
+\begin{minted}{ocaml}
+predicate identical_columns (g:takuzu_grid) (s1 s2:int) =
+  identical_chunks g s1 s2 8 8
+
+let check_rule_3_for_column (g:takuzu_grid) (start:int) : unit
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { forall k. 0 <= k < 8 /\ k <> start ->
+               not (identical_columns g start k) }
+  raises { Invalid -> true }
+=
+  for i=0 to 7 do
+    invariant { __FORMULA_TO_BE_COMPLETED__ }
+      (* CODE TO BE COMPLETED *)raise Invalid
+  done
+
+predicate identical_rows (g:takuzu_grid) (s1 s2:int) =
+  identical_chunks g s1 s2 1 8
+
+let check_rule_3_for_row (g:takuzu_grid) (start:int) : unit
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { forall k. 0 <= k < 8 /\ 8*k <> start ->
+               not (identical_rows g start (8*k)) }
+  raises { Invalid -> true }
+= (* CODE TO BE COMPLETED *)raise Invalid
+\end{minted}
+
+\hypertarget{rules-satisfaction-for-a-given-cell}{%
+\subsubsection{Rules satisfaction for a given
+cell}\label{rules-satisfaction-for-a-given-cell}}
+
+\hypertarget{question-16}{%
+\paragraph{QUESTION 16}\label{question-16}}
+
+\begin{minted}{ocaml}
+predicate rule_1_for_cell (g:takuzu_grid) (n:int) =
+\end{minted}
+
+\texttt{rule\_1\_for\_cell\ g\ n} is true whenever the first Takuzu rule
+is satisfied for the row and the column of the cell number \texttt{n}
+
+\begin{minted}{ocaml}
+  let cs = column_start_index n in
+  let rs = row_start_index n in
+  __FORMULA_TO_BE_COMPLETED__
+
+predicate rule_2_for_cell (g:takuzu_grid) (n:int) =
+\end{minted}
+
+\texttt{rule\_2\_for\_cell\ g\ n} is true whenever the second Takuzu
+rule is satisfied for the row and the column of the cell number
+\texttt{n}
+
+\begin{minted}{ocaml}
+  let cs = column_start_index n in
+  let rs = row_start_index n in
+  __FORMULA_TO_BE_COMPLETED__
+
+predicate rule_3_for_cell (g:takuzu_grid) (n:int) =
+\end{minted}
+
+\texttt{rule\_3\_for\_cell\ g\ n} is true whenever the third Takuzu rule
+is satisfied for the row and the column of the cell number \texttt{n}
+
+\begin{minted}{ocaml}
+  let cs = column_start_index n in
+  let rs = row_start_index n in
+  forall i. 0 <= i < 8 -> __FORMULA_TO_BE_COMPLETED__
+
+predicate valid_for_cell (g:takuzu_grid) (i:int) =
+\end{minted}
+
+\texttt{valid\_for\_cell\ g\ n} is true whenever cell number \texttt{n}
+satisfy the Takuzu rules
+
+\begin{minted}{ocaml}
+  rule_1_for_cell g i /\ rule_2_for_cell g i /\ rule_3_for_cell g i
+
+predicate valid_up_to (g:takuzu_grid) (n:int)
+\end{minted}
+
+\texttt{valid\_up\_to\ g\ n} is true whenever all cells with number
+smaller than \texttt{n} satisfy the Takuzu rules
+
+\begin{minted}{ocaml}
+= forall i. 0 <= i < n -> valid_for_cell g i
+\end{minted}
+
+\hypertarget{question-17}{%
+\paragraph{QUESTION 17}\label{question-17}}
+
+\begin{minted}{ocaml}
+let check_at_cell (g:takuzu_grid) (n:int) : unit
+\end{minted}
+
+\texttt{check\_at\_cell\ g\ n} returns normally if the grid \texttt{g}
+satisfy the rules for cell \texttt{n}.
+
+\begin{minted}{ocaml}
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { valid_for_cell g n }
+  raises { Invalid -> true }
+=
+  let col_start = column_start_index n in
+  let row_start = row_start_index n in
+  check_rule_1_for_chunk g col_start 8;
+  check_rule_1_for_chunk g row_start 1;
+  check_rule_2_for_chunk g col_start 8;
+  check_rule_2_for_chunk g row_start 1;
+  check_rule_3_for_column g col_start;
+  check_rule_3_for_row g row_start
+\end{minted}
+
+\hypertarget{questions-18-19-and-20}{%
+\paragraph{QUESTIONS 18, 19 AND 20}\label{questions-18-19-and-20}}
+
+\begin{minted}{ocaml}
+let check_cell_change (g:takuzu_grid) (n:int) (e:elem) : unit
+\end{minted}
+
+\texttt{check\_cell\_change\ g\ n\ e} takes a grid \texttt{g} that
+satisfies the rules up to cell \texttt{n} (not included). it sets cell
+\texttt{n} to the given value \texttt{e} and checks if the rules are
+still satisfied for cell \texttt{n} and returns normally. It raises
+exception \texttt{Invalid} if any check fails. It should be used
+incrementally, as it assumes that the rules are already satisfied for
+cell whose number is strictly smaller than \texttt{n}.
+
+\begin{minted}{ocaml}
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  requires { valid_up_to (g[n<-Empty]) n }
+  writes { g }
+  ensures { valid_up_to g (n+1) }
+  raises { Invalid -> true }
+=
+  g[n] <- e;
+  assert { valid_up_to g[n<-Empty] n };
+  check_at_cell g n
+\end{minted}
+
+\hypertarget{the-main-algorithm}{%
+\subsubsection{The main algorithm}\label{the-main-algorithm}}
+
+\begin{minted}{ocaml}
+predicate full_up_to (g:takuzu_grid) (n:int)
+\end{minted}
+
+\texttt{full\_up\_to\ g\ n} is true whenever all the cells lower than
+\texttt{n} are non-empty
+
+\begin{minted}{ocaml}
+= forall k. 0 <= k < n -> g[k] <> Empty
+
+predicate extends (g1:takuzu_grid) (g2:takuzu_grid)
+\end{minted}
+
+\texttt{extends\ g1\ g2} is true when \texttt{g2} is an extension of
+\texttt{g1}, that is all non-empty cells of \texttt{g1} are non-empty in
+\texttt{g2} and with the same value.
+
+\begin{minted}{ocaml}
+= forall k. 0 <= k < 64 -> g1[k] <> Empty -> g2[k] = g1[k]
+\end{minted}
+
+\hypertarget{question-21}{%
+\paragraph{QUESTION 21}\label{question-21}}
+
+\begin{minted}{ocaml}
+exception SolutionFound
+
+let rec solve_aux (g:takuzu_grid) (n:int) : unit
+  requires { __FORMULA_TO_BE_COMPLETED__ }
+  requires { full_up_to g n }
+  requires { valid_up_to g n }
+  writes { g }
+  variant { __VARIANT_TO_BE_COMPLETED__ }
+  ensures { __FORMULA_TO_BE_COMPLETED__ }
+  raises { SolutionFound -> extends (old g) g /\ full_up_to g 64 /\ valid_up_to g 64 }
+=
+  if n=64 then raise SolutionFound;
+  match g[n] with
+  | Zero | One ->
+    try
+      check_at_cell g n; solve_aux g (n+1)
+    with Invalid -> ()
+    end
+  | Empty ->
+    try
+      check_cell_change g n Zero;
+      solve_aux g (n+1)
+    with Invalid -> ()
+    end;
+    try
+      check_cell_change g n One;
+      solve_aux g (n+1)
+    with Invalid -> ()
+    end;
+    g[n] <- Empty
+  end
+
+exception NoSolution
+
+let solve (g:takuzu_grid) : unit
+  requires { g.length = 64 }
+  ensures { full_up_to g 64 }
+  ensures { extends (old g) g }
+  ensures { valid_up_to g 64 }
+  raises { NoSolution -> true }
+=
+  try
+    solve_aux g 0;
+    raise NoSolution
+  with SolutionFound -> ()
+  end
+
+end
+\end{minted}
+
+\hypertarget{some-tests}{%
+\subsection{Some Tests}\label{some-tests}}
+
+\begin{minted}{ocaml}
+module Test
+
+  use array.Array
+  use Takuzu
+
+  let empty () : takuzu_grid
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    Takuzu.solve a;
+    a
+\end{minted}
+
+Solving the empty grid: easy, yet not trivial
+
+Other examples
+
+\begin{minted}{ocaml}
+  let example1 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[2] <- Zero;
+    a[5] <- One;
+    a[8] <- One;
+    a[22] <- Zero;
+    a[25] <- Zero;
+    a[27] <- Zero;
+    a[28] <- Zero;
+    a[30] <- Zero;
+    a[41] <- Zero;
+    a[42] <- Zero;
+    a[44] <- Zero;
+    a[50] <- Zero;
+    a[52] <- One;
+    a[56] <- One;
+    a[62] <- Zero;
+    a[63] <- Zero;
+    Takuzu.solve a;
+    a
+
+  let example2 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[4] <- Zero;
+    a[8] <- One;
+    a[13] <- Zero;
+    a[14] <- One;
+    a[22] <- One;
+    a[25] <- One;
+    a[28] <- One;
+    a[33] <- One;
+    a[46] <- Zero;
+    a[47] <- Zero;
+    a[52] <- One;
+    a[55] <- Zero;
+    a[57] <- Zero;
+    a[58] <- Zero;
+    a[60] <- One;
+    Takuzu.solve a;
+    a
+
+let example3 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[1] <- Zero;
+    a[3] <- Zero;
+    a[7] <- Zero;
+    a[12] <- One;
+    a[18] <- One;
+    a[23] <- Zero;
+    a[25] <- One;
+    a[37] <- One;
+    a[40] <- Zero;
+    a[46] <- Zero;
+    a[51] <- One;
+    a[53] <- Zero;
+    a[54] <- Zero;
+    a[57] <- Zero;
+    a[60] <- One;
+    Takuzu.solve a;
+    a
+
+let example4 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[1] <- One;
+    a[2] <- One;
+    a[5] <- One;
+    a[7] <- Zero;
+    a[9] <- Zero;
+    a[11] <- Zero;
+    a[21] <- One;
+    a[23] <- Zero;
+    a[34] <- Zero;
+    a[38] <- One;
+    a[40] <- Zero;
+    a[44] <- Zero;
+    a[47] <- Zero;
+    a[53] <- One;
+    a[55] <- One;
+    a[56] <- Zero;
+    Takuzu.solve a;
+    a
+
+let example5 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[7] <- Zero;
+    a[15] <- One;
+    a[21] <- Zero;
+    a[24] <- Zero;
+    a[39] <- Zero;
+    a[45] <- One;
+    a[46] <- One;
+    a[50] <- One;
+    a[54] <- One;
+    a[56] <- One;
+    a[59] <- Zero;
+    a[60] <- Zero;
+    Takuzu.solve a;
+    a
+
+let example6 ()
+    raises { NoSolution -> true }
+  = let a = Array.make 64 Empty in
+    a[0] <- One;
+    a[2] <- One;
+    a[7] <- One;
+    a[11] <- One;
+    a[20] <- Zero;
+    a[30] <- One;
+    a[32] <- One;
+    a[37] <- Zero;
+    a[47] <- Zero;
+    a[50] <- One;
+    a[53] <- Zero;
+    a[54] <- One;
+    a[57] <- Zero;
+    a[58] <- Zero;
+    a[62] <- One;
+    Takuzu.solve a;
+    a
+
+end
+\end{minted}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+Generated by why3doc 1.3.3
