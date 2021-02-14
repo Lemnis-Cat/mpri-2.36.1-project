@@ -153,9 +153,9 @@ let no_3_consecutive_zeros_version_3 (a : array int) : bool
 
 let rec ghost function num_occ (e:int) (f:int -> int) (i j :int) : int
   (** number of `l`, `i <= l < j`, such that `f l` is equal to `e` *)
-  variant { __VARIANT_TO_BE_COMPLETED__ }
-  = if __FORMULA_TO_BE_COMPLETED__ then 0 else
-    if __FORMULA_TO_BE_COMPLETED__ then 1 + num_occ e f i (j-1) else num_occ e f i (j-1)
+  variant { j - i }
+  = if j <= i then 0 else
+    if f (j-1) = e then 1 + num_occ e f i (j-1) else num_occ e f i (j-1)
 
 (**
 
@@ -164,12 +164,17 @@ let rec ghost function num_occ (e:int) (f:int -> int) (i j :int) : int
 *)
 
 let count_number_of (e:int) (a:array int) : int
-  ensures { __FORMULA_TO_BE_COMPLETED__ }
+  ensures { result = num_occ e a.elts 0 a.length }
   =
   let ref n = 0 in
   for i=0 to a.length - 1 do
-    invariant { __FORMULA_TO_BE_COMPLETED__ }
-    __CODE_TO_BE_COMPLETED__
+    invariant { 
+      n = num_occ e a.elts 0 i /\
+      (a.elts i =  e <-> num_occ e a.elts 0 (i+1) = num_occ e a.elts 0 i + 1) /\
+      (a.elts i <> e <-> num_occ e a.elts 0 (i+1) = num_occ e a.elts 0 i)
+    }
+    if a[i] = e then
+      n <- n+1
   done;
   n
 
@@ -202,7 +207,10 @@ let same_number_of_zeros_and_ones (a:array int) : bool
 predicate identical_sub_arrays (a:array int) (o1 o2 l:int)
 (** [identical_sub_arrays a o1 o2 l] is true whenever the sub-arrays
     [a[o1..o1+l-1]] and [a[o2..o2+l-1]] are point-wise identical *)
-= forall k:int. __FORMULA_TO_BE_COMPLETED__
+= forall k:int. 0 <= k < l ->
+  0 <= o1 + k < a.length /\
+  0 <= o2 + k < a.length /\
+  a[o1 + k] = a[o2 + k]
 
 (**
 
@@ -213,11 +221,24 @@ predicate identical_sub_arrays (a:array int) (o1 o2 l:int)
 exception DiffFound
 
 let check_identical_sub_arrays (a:array int) (o1 o2 l:int) : bool
-  requires { __FORMULA_TO_BE_COMPLETED__ }
+  requires {
+    0 <= o1 /\
+    o1 + l <= a.length /\
+    0 <= o2 /\
+    o2 + l <= a.length
+  }
   ensures { result = True <-> identical_sub_arrays a o1 o2 l }
 = try
     for k=0 to l-1 do
-      invariant { __FORMULA_TO_BE_COMPLETED__ }
+      invariant {
+        identical_sub_arrays a o1 o2 k /\
+        l>0 ->
+          0 <= o1 + k < a.length /\
+          0 <= o2 + k < a.length /\
+          (identical_sub_arrays a o1 o2 k ->
+            a[o1+k] = a[o2+k] -> identical_sub_arrays a o1 o2 (k+1)) /\
+          (a[o1+k] <> a[o2+k] -> not identical_sub_arrays a o1 o2 (k+1))
+      }
       if a[o1+k] <> a[o2+k] then raise DiffFound
     done;
     True
