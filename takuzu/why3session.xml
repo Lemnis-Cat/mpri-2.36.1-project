@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Z3" version="4.8.6" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="takuzu.mlw"/>
+<theory name="Appetizers" proved="true">
+ <goal name="no_3_consecutive_zeros_version_1&#39;vc" expl="VC for no_3_consecutive_zeros_version_1" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="11910"/></proof>
+ </goal>
+ <goal name="no_3_consecutive_zeros_version_2&#39;vc" expl="VC for no_3_consecutive_zeros_version_2" proved="true">
+ <proof prover="1"><result status="valid" time="0.09" steps="17344"/></proof>
+ </goal>
+ <goal name="no_3_consecutive_zeros_version_3&#39;vc" expl="VC for no_3_consecutive_zeros_version_3" proved="true">
+ <proof prover="1"><result status="valid" time="0.31" steps="76695"/></proof>
+ </goal>
+ <goal name="num_occ&#39;vc" expl="VC for num_occ" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="2536"/></proof>
+ </goal>
+ <goal name="count_number_of&#39;vc" expl="VC for count_number_of" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="7858"/></proof>
+ </goal>
+ <goal name="same_number_of_zeros_and_ones&#39;vc" expl="VC for same_number_of_zeros_and_ones" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="2383"/></proof>
+ </goal>
+ <goal name="identical_sub_arrays_rec" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="identical_sub_arrays_rec.0" proved="true">
+  <transf name="inline_goal" proved="true" >
+   <goal name="identical_sub_arrays_rec.0.0" proved="true">
+   <transf name="split_vc" proved="true" >
+    <goal name="identical_sub_arrays_rec.0.0.0" proved="true">
+    <proof prover="0" timelimit="1"><result status="valid" time="0.51" steps="3507921"/></proof>
+    <proof prover="1"><result status="timeout" time="1.00" steps="185265"/></proof>
+    </goal>
+    <goal name="identical_sub_arrays_rec.0.0.1" proved="true">
+    <proof prover="1"><result status="valid" time="0.05" steps="3706"/></proof>
+    </goal>
+    <goal name="identical_sub_arrays_rec.0.0.2" proved="true">
+    <proof prover="0" memlimit="2000"><result status="valid" time="1.77" steps="14114553"/></proof>
+    <proof prover="1" timelimit="5" memlimit="2000"><result status="timeout" time="5.00" steps="850993"/></proof>
+    </goal>
+    <goal name="identical_sub_arrays_rec.0.0.3" proved="true">
+    <proof prover="1"><result status="valid" time="0.05" steps="3706"/></proof>
+    </goal>
+    <goal name="identical_sub_arrays_rec.0.0.4" proved="true">
+    <transf name="inline_all" proved="true" >
+     <goal name="identical_sub_arrays_rec.0.0.4.0" proved="true">
+     <transf name="instantiate" proved="true" arg1="H7" arg2="k">
+      <goal name="identical_sub_arrays_rec.0.0.4.0.0" proved="true">
+      <proof prover="1"><result status="valid" time="0.05" steps="4208"/></proof>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="check_identical_sub_arrays&#39;vc" expl="VC for check_identical_sub_arrays" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="check_identical_sub_arrays&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="1"><result status="valid" time="0.05" steps="3974"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.1" expl="loop invariant init" proved="true">
+  <proof prover="1"><result status="valid" time="0.06" steps="4027"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.2" expl="loop invariant init" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="check_identical_sub_arrays&#39;vc.2.0" expl="loop invariant init" proved="true">
+   <proof prover="1"><result status="valid" time="0.06" steps="7315"/></proof>
+   </goal>
+   <goal name="check_identical_sub_arrays&#39;vc.2.1" expl="loop invariant init" proved="true">
+   <transf name="inline_goal" proved="true" >
+    <goal name="check_identical_sub_arrays&#39;vc.2.1.0" expl="loop invariant init" proved="true">
+    <transf name="split_all_full" proved="true" >
+     <goal name="check_identical_sub_arrays&#39;vc.2.1.0.0" expl="loop invariant init" proved="true">
+     <proof prover="0" memlimit="2000"><result status="valid" time="4.03" steps="21855993"/></proof>
+     <proof prover="1" timelimit="5" memlimit="2000"><result status="timeout" time="5.00" steps="425628"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.3" expl="loop invariant init" proved="true">
+  <proof prover="1"><result status="valid" time="0.08" steps="4374"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.4" expl="index in array bounds" proved="true">
+  <proof prover="1"><result status="valid" time="0.08" steps="4243"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.5" expl="index in array bounds" proved="true">
+  <proof prover="1"><result status="valid" time="0.06" steps="4243"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.6" expl="postcondition" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="check_identical_sub_arrays&#39;vc.6.0" expl="postcondition" proved="true">
+   <proof prover="1"><result status="valid" time="0.04" steps="3398"/></proof>
+   </goal>
+   <goal name="check_identical_sub_arrays&#39;vc.6.1" expl="postcondition" proved="true">
+   <transf name="inline_goal" proved="true" >
+    <goal name="check_identical_sub_arrays&#39;vc.6.1.0" expl="postcondition" proved="true">
+    <transf name="split_all_full" proved="true" >
+     <goal name="check_identical_sub_arrays&#39;vc.6.1.0.0" expl="postcondition" proved="true">
+     <proof prover="0" timelimit="1"><result status="valid" time="0.05" steps="53242"/></proof>
+     <proof prover="1"><result status="timeout" time="1.00" steps="103817"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.7" expl="loop invariant preservation" proved="true">
+  <proof prover="1"><result status="valid" time="0.03" steps="4270"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.8" expl="loop invariant preservation" proved="true">
+  <proof prover="1"><result status="valid" time="0.03" steps="4341"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.9" expl="loop invariant preservation" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="check_identical_sub_arrays&#39;vc.9.0" expl="loop invariant preservation" proved="true">
+   <transf name="apply" proved="true" arg1="identical_sub_arrays_rec">
+    <goal name="check_identical_sub_arrays&#39;vc.9.0.0" expl="apply premises" proved="true">
+    <proof prover="1"><result status="valid" time="0.04" steps="3528"/></proof>
+    </goal>
+    <goal name="check_identical_sub_arrays&#39;vc.9.0.1" expl="apply premises" proved="true">
+    <proof prover="1"><result status="valid" time="0.05" steps="3981"/></proof>
+    </goal>
+    <goal name="check_identical_sub_arrays&#39;vc.9.0.2" expl="apply premises" proved="true">
+    <proof prover="1"><result status="valid" time="0.05" steps="4466"/></proof>
+    </goal>
+    <goal name="check_identical_sub_arrays&#39;vc.9.0.3" expl="apply premises" proved="true">
+    <proof prover="1"><result status="valid" time="0.06" steps="4466"/></proof>
+    </goal>
+    <goal name="check_identical_sub_arrays&#39;vc.9.0.4" expl="apply premises" proved="true">
+    <proof prover="1"><result status="valid" time="0.04" steps="3734"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="check_identical_sub_arrays&#39;vc.9.1" expl="loop invariant preservation" proved="true">
+   <transf name="inline_all" proved="true" >
+    <goal name="check_identical_sub_arrays&#39;vc.9.1.0" expl="loop invariant preservation" proved="true">
+    <transf name="instantiate" proved="true" arg1="H" arg2="(k+1)">
+     <goal name="check_identical_sub_arrays&#39;vc.9.1.0.0" expl="loop invariant preservation" proved="true">
+     <proof prover="1"><result status="valid" time="0.05" steps="6242"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.10" expl="loop invariant preservation" proved="true">
+  <proof prover="1"><result status="valid" time="0.07" steps="24350"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.11" expl="postcondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.04" steps="3329"/></proof>
+  </goal>
+  <goal name="check_identical_sub_arrays&#39;vc.12" expl="postcondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.04" steps="3492"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Takuzu">
+ <goal name="eq&#39;vc" expl="VC for eq">
+ </goal>
+ <goal name="column_start_index&#39;vc" expl="VC for column_start_index">
+ </goal>
+ <goal name="row_start_index&#39;vc" expl="VC for row_start_index">
+ </goal>
+ <goal name="valid_chunk">
+ </goal>
+ <goal name="acc&#39;vc" expl="VC for acc">
+ </goal>
+ <goal name="check_rule_1_for_chunk&#39;vc" expl="VC for check_rule_1_for_chunk">
+ </goal>
+ <goal name="count_number_of&#39;vc" expl="VC for count_number_of">
+ </goal>
+ <goal name="check_rule_2_for_chunk&#39;vc" expl="VC for check_rule_2_for_chunk">
+ </goal>
+ <goal name="check_identical_chunks&#39;vc" expl="VC for check_identical_chunks">
+ </goal>
+ <goal name="check_rule_3_for_column&#39;vc" expl="VC for check_rule_3_for_column">
+ </goal>
+ <goal name="check_rule_3_for_row&#39;vc" expl="VC for check_rule_3_for_row">
+ </goal>
+ <goal name="check_at_cell&#39;vc" expl="VC for check_at_cell">
+ </goal>
+ <goal name="check_cell_change&#39;vc" expl="VC for check_cell_change">
+ </goal>
+ <goal name="solve_aux&#39;vc" expl="VC for solve_aux">
+ </goal>
+ <goal name="solve&#39;vc" expl="VC for solve">
+ </goal>
+</theory>
+<theory name="Test">
+ <goal name="empty&#39;vc" expl="VC for empty">
+ </goal>
+ <goal name="example1&#39;vc" expl="VC for example1">
+ </goal>
+ <goal name="example2&#39;vc" expl="VC for example2">
+ </goal>
+ <goal name="example3&#39;vc" expl="VC for example3">
+ </goal>
+ <goal name="example4&#39;vc" expl="VC for example4">
+ </goal>
+ <goal name="example5&#39;vc" expl="VC for example5">
+ </goal>
+ <goal name="example6&#39;vc" expl="VC for example6">
+ </goal>
+</theory>
+</file>
+</why3session>
