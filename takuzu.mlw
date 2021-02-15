@@ -366,7 +366,7 @@ let check_rule_1_for_chunk (g:takuzu_grid) start incr
 
 
 
-(** {QUESTION 12}
+(** {4 QUESTION 12}
 
   Rule 2 for chunks
 
@@ -393,7 +393,7 @@ let count_number_of (e:elem) (g:takuzu_grid) start incr : int
   done;
   n
 
-(** {QUESTION 13} *)
+(** {4 QUESTION 13} *)
 
 predicate rule_2_for_chunk (g:takuzu_grid) (start incr:int) =
   (** `rule_2_for_chunk g s i` is true when rule 2 is not violated in chunk
@@ -414,7 +414,7 @@ let check_rule_2_for_chunk (g:takuzu_grid) start incr : unit
 
 
 
-(** {QUESTION 14}
+(** {4 QUESTION 14}
 
   Rule 3 for chunks
 
@@ -447,7 +447,7 @@ let check_identical_chunks g start1 start2 incr : bool
   end
 
 
-(** {QUESTION 15} *)
+(** {4 QUESTION 15} *)
 
 predicate identical_columns (g:takuzu_grid) (s1 s2:int) =
   identical_chunks g s1 s2 8 8
